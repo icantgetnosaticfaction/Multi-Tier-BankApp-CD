@@ -1,0 +1,84 @@
+# =========================
+# Namespace
+# =========================
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: bankapp
+---
+# =========================
+# Backend Deployment
+# =========================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bankapp-backend
+  namespace: bankapp
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: bankapp-backend
+  template:
+    metadata:
+      labels:
+        app: bankapp-backend
+    spec:
+      containers:
+      - name: backend
+        image: deshmukhparvez/bankapp-backend:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: DB_HOST
+          value: mysql
+        - name: DB_NAME
+          value: bankdb
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bankapp-backend
+  namespace: bankapp
+spec:
+  selector:
+    app: bankapp-backend
+  ports:
+  - port: 8080
+    targetPort: 8080
+---
+# =========================
+# Frontend Deployment
+# =========================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bankapp-frontend
+  namespace: bankapp
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: bankapp-frontend
+  template:
+    metadata:
+      labels:
+        app: bankapp-frontend
+    spec:
+      containers:
+      - name: frontend
+        image: deshmukhparvez/bankapp-frontend:latest
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bankapp-frontend
+  namespace: bankapp
+spec:
+  selector:
+    app: bankapp-frontend
+  ports:
+  - port: 80
+    targetPort: 80
